@@ -19,7 +19,10 @@ export const FRED_SERIES_IDS = {
   FED_FUNDS: 'FEDFUNDS',
   TREASURY_3M: 'DGS3MO',
   HOUSING_STARTS: 'HOUST',
-  MORTGAGE_30Y: 'MORTGAGE30US'
+  MORTGAGE_30Y: 'MORTGAGE30US',
+  GDP: 'GDP',
+  USD_EUR: 'DEXUSEU',
+  RETAIL_SALES: 'RSAFS'
 };
 
 export async function fetchFredData(
@@ -84,6 +87,15 @@ function getMockData(seriesId: string): FredDataPoint[] {
         break;
       case FRED_SERIES_IDS.MORTGAGE_30Y:
         value = 6.5 + (Math.sin(i / 5) * 0.4) + (Math.random() * 0.2);
+        break;
+      case FRED_SERIES_IDS.GDP:
+        value = 27000 + (i * 120) + (Math.random() * 100 - 50);
+        break;
+      case FRED_SERIES_IDS.USD_EUR:
+        value = 1.08 + (Math.sin(i / 4) * 0.04) + (Math.random() * 0.01);
+        break;
+      case FRED_SERIES_IDS.RETAIL_SALES:
+        value = 700000 + (i * 1500) + (Math.random() * 4000 - 2000);
         break;
       default:
         value = 100 + (i * 2) + (Math.random() * 5);

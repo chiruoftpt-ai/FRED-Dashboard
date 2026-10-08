@@ -62,6 +62,24 @@ export default function Dashboard() {
     dateRange.end
   );
 
+  const { data: gdpData, loading: gdpLoading } = useFredData(
+    FRED_SERIES_IDS.GDP,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: usdEurData, loading: usdEurLoading } = useFredData(
+    FRED_SERIES_IDS.USD_EUR,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: retailSalesData, loading: retailSalesLoading } = useFredData(
+    FRED_SERIES_IDS.RETAIL_SALES,
+    dateRange.start,
+    dateRange.end
+  );
+
   const sidebarItems = [
     { name: 'Key Indicators', icon: BarChart2 },
     { name: 'Inflation', icon: TrendingUp },
@@ -78,7 +96,10 @@ export default function Dashboard() {
     'Inflation': ['cpi'],
     'Employment': ['unemployment'],
     'Interest Rates': ['treasury10y', 'treasury3m', 'fedfunds', 'mortgage'],
+    'Economic Growth': ['gdp'],
+    'Exchange Rates': ['usdEur'],
     'Housing': ['housingStarts', 'mortgage'],
+    'Consumer Spending': ['retailSales'],
   };
   const visibleCharts = categoryCharts[selectedCategory] ?? [];
   const show = (id: string) => visibleCharts.includes(id);
@@ -460,6 +481,147 @@ export default function Dashboard() {
               <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
                 <span>Last Updated: {new Date().toLocaleDateString()}</span>
                 <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.MORTGAGE_30Y}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+
+            {/* GDP Chart */}
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('gdp') ? '' : 'hidden'}`}>
+              <h3 className="text-base font-semibold text-gray-800 mb-4">Gross Domestic Product</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">Gross Domestic Product, Billions of Dollars (GDP)</span>
+              </div>
+              {gdpLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={gdpData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 500', 'dataMax + 500']}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(1)}T`}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `$${(value / 1000).toFixed(2)}T`}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#6366f1"
+                      fill="#c7d2fe"
+                      strokeWidth={2}
+                      name="GDP"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.GDP}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+
+            {/* USD/EUR Exchange Rate Chart */}
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('usdEur') ? '' : 'hidden'}`}>
+              <h3 className="text-base font-semibold text-gray-800 mb-4">U.S. Dollars per Euro</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">U.S. Dollars to Euro Spot Exchange Rate (DEXUSEU)</span>
+              </div>
+              {usdEurLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={usdEurData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 0.02', 'dataMax + 0.02']}
+                      tickFormatter={(value) => value.toFixed(2)}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `$${value.toFixed(4)}`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#ec4899"
+                      strokeWidth={2}
+                      dot={false}
+                      name="USD per EUR"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.USD_EUR}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+
+            {/* Retail Sales Chart */}
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('retailSales') ? '' : 'hidden'}`}>
+              <h3 className="text-base font-semibold text-gray-800 mb-4">Retail Sales</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">Advance Retail Sales: Retail Trade and Food Services (RSAFS)</span>
+              </div>
+              {retailSalesLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={retailSalesData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 10000', 'dataMax + 10000']}
+                      tickFormatter={(value) => `$${Math.round(value / 1000)}B`}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `$${(value / 1000).toFixed(1)}B`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#f97316"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Retail Sales"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.RETAIL_SALES}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
               </div>
             </div>
           </div>
