@@ -50,6 +50,18 @@ export default function Dashboard() {
     dateRange.end
   );
 
+  const { data: housingStartsData, loading: housingStartsLoading } = useFredData(
+    FRED_SERIES_IDS.HOUSING_STARTS,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: mortgageData, loading: mortgageLoading } = useFredData(
+    FRED_SERIES_IDS.MORTGAGE_30Y,
+    dateRange.start,
+    dateRange.end
+  );
+
   const sidebarItems = [
     { name: 'Key Indicators', icon: BarChart2 },
     { name: 'Inflation', icon: TrendingUp },
@@ -114,6 +126,8 @@ export default function Dashboard() {
 
           {/* Charts Grid */}
           <div className="grid grid-cols-2 gap-6">
+            {selectedCategory !== 'Housing' && (
+            <>
             {/* CPI Chart */}
             <div className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-base font-semibold text-gray-800 mb-4">Consumer Price Index (CPI)</h3>
@@ -347,6 +361,106 @@ export default function Dashboard() {
                 <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.FED_FUNDS}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
               </div>
             </div>
+
+            </>
+            )}
+
+            {selectedCategory === 'Housing' && (
+            <>
+            {/* Housing Starts Chart */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-base font-semibold text-gray-800 mb-4">Housing Starts</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">New Privately-Owned Housing Units Started, Thousands (HOUST)</span>
+              </div>
+              {housingStartsLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={housingStartsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 100', 'dataMax + 100']}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `${value.toFixed(0)}K units`}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#0ea5e9"
+                      fill="#bae6fd"
+                      strokeWidth={2}
+                      name="Housing Starts"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.HOUSING_STARTS}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+
+            {/* 30-Year Mortgage Rate Chart */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-base font-semibold text-gray-800 mb-4">30-Year Mortgage Rate</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">30-Year Fixed Rate Mortgage Average (MORTGAGE30US)</span>
+              </div>
+              {mortgageLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={mortgageData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `${value.toFixed(2)}%`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                      dot={false}
+                      name="30-Year Mortgage Rate"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.MORTGAGE_30Y}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+            </>
+            )}
           </div>
         </div>
       </div>
