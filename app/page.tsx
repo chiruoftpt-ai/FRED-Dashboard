@@ -73,7 +73,17 @@ export default function Dashboard() {
     { name: 'Consumer Spending', icon: ShoppingCart },
   ];
 
-  const formatXAxisDate = (dateStr: string) => {
+  const categoryCharts: Record<string, string[]> = {
+    'Key Indicators': ['cpi', 'unemployment', 'treasury10y', 'fedfunds'],
+    'Inflation': ['cpi'],
+    'Employment': ['unemployment'],
+    'Interest Rates': ['treasury10y', 'treasury3m', 'fedfunds', 'mortgage'],
+    'Housing': ['housingStarts', 'mortgage'],
+  };
+  const visibleCharts = categoryCharts[selectedCategory] ?? [];
+  const show = (id: string) => visibleCharts.includes(id);
+
+  const formatXAxisDate =(dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
   };
@@ -126,10 +136,8 @@ export default function Dashboard() {
 
           {/* Charts Grid */}
           <div className="grid grid-cols-2 gap-6">
-            {selectedCategory !== 'Housing' && (
-            <>
             {/* CPI Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('cpi') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">Consumer Price Index (CPI)</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -175,7 +183,7 @@ export default function Dashboard() {
             </div>
 
             {/* Unemployment Rate Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('unemployment') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">Unemployment Rate</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -222,7 +230,7 @@ export default function Dashboard() {
             </div>
 
             {/* 10-Year Treasury Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('treasury10y') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">10-Year Treasury Yield</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -269,7 +277,7 @@ export default function Dashboard() {
             </div>
 
             {/* 3-Month Treasury Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('treasury3m') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">3-Month Treasury Yield</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -316,7 +324,7 @@ export default function Dashboard() {
             </div>
 
             {/* Federal Funds Rate Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('fedfunds') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">Federal Funds Rate</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -362,13 +370,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            </>
-            )}
-
-            {selectedCategory === 'Housing' && (
-            <>
             {/* Housing Starts Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('housingStarts') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">Housing Starts</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -414,7 +417,7 @@ export default function Dashboard() {
             </div>
 
             {/* 30-Year Mortgage Rate Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className={`bg-white rounded-xl shadow-md p-6 ${show('mortgage') ? '' : 'hidden'}`}>
               <h3 className="text-base font-semibold text-gray-800 mb-4">30-Year Mortgage Rate</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-medium text-gray-900">FRED</span>
@@ -459,9 +462,12 @@ export default function Dashboard() {
                 <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.MORTGAGE_30Y}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
               </div>
             </div>
-            </>
-            )}
           </div>
+          {visibleCharts.length === 0 && (
+            <div className="bg-white rounded-xl shadow-md p-6 text-sm text-gray-500">
+              No charts available for {selectedCategory} yet.
+            </div>
+          )}
         </div>
       </div>
     </div>
