@@ -44,6 +44,12 @@ export default function Dashboard() {
     dateRange.end
   );
 
+  const { data: fedFundsData, loading: fedFundsLoading } = useFredData(
+    FRED_SERIES_IDS.FED_FUNDS,
+    dateRange.start,
+    dateRange.end
+  );
+
   const sidebarItems = [
     { name: 'Key Indicators', icon: BarChart2 },
     { name: 'Inflation', icon: TrendingUp },
@@ -292,6 +298,53 @@ export default function Dashboard() {
               <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
                 <span>Last Updated: {new Date().toLocaleDateString()}</span>
                 <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.TREASURY_3M}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
+              </div>
+            </div>
+
+            {/* Federal Funds Rate Chart */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-base font-semibold text-gray-800 mb-4">Federal Funds Rate</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm font-medium text-gray-900">FRED</span>
+                <span className="text-xs text-gray-500">Effective Federal Funds Rate (FEDFUNDS)</span>
+              </div>
+              {fedFundsLoading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={fedFundsData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisDate}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      labelFormatter={formatTooltipDate}
+                      formatter={(value: number) => `${value.toFixed(2)}%`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#ef4444"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Fed Funds Rate"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <span>Last Updated: {new Date().toLocaleDateString()}</span>
+                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.FED_FUNDS}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
               </div>
             </div>
           </div>
